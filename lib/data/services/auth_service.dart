@@ -13,8 +13,9 @@ class AuthService {
         password: password,
       );
       return credential.user;
-    } catch (e) {
-      log("Error : " + e.toString());
+    } on FirebaseAuthException catch (e) {
+      log("createNewUser Error: " + e.toString());
+      return e.message.toString();
     }
   }
 

@@ -152,22 +152,32 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
           ),
         ),
         onPressed: () => {
-          if (_formKey.currentState!.validate()) _scaffoldMessage(),
+          if (_formKey.currentState!.validate()) createNewUser(),
         },
       ),
     );
   }
 
-  void _scaffoldMessage() {
+  void createNewUser() {
+    showSnackBar(context, "Register Loading...");
     _authRepository
         .createNewUser(
       _nameController.text,
       _emailController.text,
       _passwordController.text,
     )
-        .then((userResult) {
-      User user = userResult;
-      showSnackBar(context, "Register email : ${user.email}");
+        .then((result) {
+      if (result.runtimeType == User) {
+        User user = result;
+        _authRepository.addUserData(_nameController.text);
+        showSnackBar(context, "Register email : ${user.email}");
+        _nameController.clear();
+        _emailController.clear();
+        _passwordController.clear();
+        Navigator.pop(context);
+      } else {
+        showSnackBar(context, result.toString());
+      }
     });
   }
 }
