@@ -28,6 +28,7 @@ class AuthRepository {
       return result;
     } catch (e) {
       log("Auth Error : " + e.toString());
+      return e;
     }
   }
 
@@ -38,6 +39,17 @@ class AuthRepository {
       return result;
     } catch (e) {
       log("SignOut Result : " + e.toString());
+      return null;
+    }
+  }
+
+  Future<dynamic> getUserList() async {
+    try {
+      var result = await _databaseManager.getUserList();
+      log("User Result AuthRepository: $result");
+      return result;
+    } catch (e) {
+      log(e.toString());
       return null;
     }
   }

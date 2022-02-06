@@ -208,11 +208,15 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
     _authRepository
         .loginUser(_emailController.text, _passwordController.text)
         .then((userResult) {
-      User user = userResult;
-      showSnackBar(context, "User email : ${user.email}");
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => const DashboardPage(),
-      ));
+      if (userResult.runtimeType == User) {
+        User user = userResult;
+        showSnackBar(context, "User email : ${user.email}");
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const DashboardPage(),
+        ));
+      } else {
+        showSnackBar(context, "$userResult");
+      }
     });
   }
 }

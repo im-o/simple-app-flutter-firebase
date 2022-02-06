@@ -22,6 +22,24 @@ class _DashboardPageState extends State<DashboardPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
   final TextEditingController _scoreController = TextEditingController();
+  List userList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDataUsers();
+  }
+
+  void fetchDataUsers() async {
+    dynamic result = await _authRepository.getUserList();
+    if (result == null) {
+      log("Null user data: $result");
+    } else {
+      setState(() {
+        userList = result;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,18 +90,18 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _dashboardBody() {
     return ListView.builder(
-      itemCount: 10,
+      itemCount: userList.length,
       itemBuilder: (context, index) {
         return Card(
           child: ListTile(
-            title: Text("Rival test $index"),
-            subtitle: Text("Age: 2$index"),
+            title: Text(userList[index]["name"]),
+            subtitle: Text("Age: ${userList[index]["age"] ?? 0}"),
             leading: const CircleAvatar(
               child: Image(
                 image: AssetImage("assets/images/programmer.png"),
               ),
             ),
-            trailing: Text("Score : 10$index"),
+            trailing: Text("Score : ${userList[index]["score"] ?? 0}"),
           ),
         );
       },
