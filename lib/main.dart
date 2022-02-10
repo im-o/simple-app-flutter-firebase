@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_user/app.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -15,28 +16,5 @@ void main() async {
     ),
   );
 
-  runApp(
-    const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
-    ),
-  );
-}
-
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
-
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.deepPurpleAccent,
-      ),
-    );
-  }
+  runApp(const App());
 }
