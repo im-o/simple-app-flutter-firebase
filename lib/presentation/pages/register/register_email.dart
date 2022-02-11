@@ -1,3 +1,5 @@
+import 'package:firebase_user/data/repositories/auth_repository.dart';
+import 'package:firebase_user/data/services/auth_service.dart';
 import 'package:firebase_user/utils/color_util.dart';
 import 'package:firebase_user/utils/text_field_util.dart';
 import 'package:firebase_user/utils/text_util.dart';
@@ -12,6 +14,14 @@ class RegisterEmailPage extends StatefulWidget {
 }
 
 class _RegisterEmailPageState extends State<RegisterEmailPage> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthRepository _authRepository = AuthRepository(
+    authService: AuthService(),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,15 +34,18 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 32),
-          child: Column(
-            children: [
-              _imageLoginHeader(),
-              _textTitle(),
-              _textFieldName(),
-              _textFieldEmail(),
-              _textFieldPassword(),
-              _buttonSignIn(),
-            ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _imageLoginHeader(),
+                _textTitle(),
+                _textFieldName(),
+                _textFieldEmail(),
+                _textFieldPassword(),
+                _buttonSignIn(),
+              ],
+            ),
           ),
         ),
       ),
@@ -58,6 +71,13 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
     return SizedBox(
       height: 50.0,
       child: TextFormField(
+        controller: _nameController,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "Name cannot be empty";
+          }
+          return null;
+        },
         style: const TextStyle(fontSize: 14),
         decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
           hintText: "Full Name",
@@ -76,6 +96,13 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
       child: SizedBox(
         height: 50.0,
         child: TextFormField(
+          controller: _emailController,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "Email cannot be empty";
+            }
+            return null;
+          },
           style: const TextStyle(fontSize: 14),
           decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
             hintText: "Email",
@@ -95,6 +122,13 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
       child: SizedBox(
         height: 50.0,
         child: TextFormField(
+          controller: _passwordController,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "Password cannot be empty";
+            }
+            return null;
+          },
           style: const TextStyle(fontSize: 14),
           obscureText: true,
           decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
@@ -123,8 +157,20 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
             borderRadius: BorderRadius.all(Radius.circular(8.0)),
           ),
         ),
-        onPressed: () => {},
+        onPressed: () => {
+          if (_formKey.currentState!.validate()) _scaffoldMessage(),
+        },
       ),
     );
+  }
+
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _scaffoldMessage() {
+    _authRepository.createNewUser(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
+    );
+    return ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Processing Data')));
   }
 }
