@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_user/data/repositories/auth_repository.dart';
 import 'package:firebase_user/data/services/auth_service.dart';
 import 'package:firebase_user/utils/color_util.dart';
 import 'package:firebase_user/utils/text_field_util.dart';
 import 'package:firebase_user/utils/text_util.dart';
+import 'package:firebase_user/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -18,9 +20,7 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthRepository _authRepository = AuthRepository(
-    authService: AuthService(),
-  );
+  final AuthRepository _authRepository = AuthRepository(AuthService());
 
   @override
   Widget build(BuildContext context) {
@@ -164,13 +164,16 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
     );
   }
 
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> _scaffoldMessage() {
-    _authRepository.createNewUser(
+  void _scaffoldMessage() {
+    _authRepository
+        .createNewUser(
       _nameController.text,
       _emailController.text,
       _passwordController.text,
-    );
-    return ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Processing Data')));
+    )
+        .then((userResult) {
+      User user = userResult;
+      showSnackBar(context, "Register email : ${user.email}");
+    });
   }
 }

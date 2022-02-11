@@ -11,9 +11,19 @@ class AuthService {
         email: email,
         password: password,
       );
-      User? user = credential.user;
-      log("User : " + user.toString());
-      return user;
+      return credential.user;
+    } catch (e) {
+      log("Error : " + e.toString());
+    }
+  }
+
+  Future loginUser(String email, String password) async {
+    try {
+      UserCredential credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return credential.user;
     } catch (e) {
       log("Error : " + e.toString());
     }
