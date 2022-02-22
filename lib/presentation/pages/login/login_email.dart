@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_user/data/repositories/auth_repository.dart';
 import 'package:firebase_user/data/services/auth_service.dart';
+import 'package:firebase_user/presentation/pages/dashboard/dashboard.dart';
 import 'package:firebase_user/presentation/pages/register/register_email.dart';
 import 'package:firebase_user/utils/color_util.dart';
 import 'package:firebase_user/utils/text_field_util.dart';
@@ -200,11 +201,15 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   }
 
   void _loginUser() {
+    showSnackBar(context, "Login loading...");
     _authRepository
         .loginUser(_emailController.text, _passwordController.text)
         .then((userResult) {
       User user = userResult;
       showSnackBar(context, "User email : ${user.email}");
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => const DashboardPage(),
+      ));
     });
   }
 }
