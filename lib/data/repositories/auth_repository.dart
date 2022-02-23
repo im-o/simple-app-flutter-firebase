@@ -26,4 +26,15 @@ class AuthRepository {
       log("Auth Error : " + e.toString());
     }
   }
+
+  Future signOut() async {
+    try {
+      var result = await authService.signOut();
+      log("SignOut Result : " + result.toString());
+      return result;
+    } catch (e) {
+      log("SignOut Result : " + e.toString());
+      return null;
+    }
+  }
 }
