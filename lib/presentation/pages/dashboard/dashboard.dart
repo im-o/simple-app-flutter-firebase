@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import '../../../data/database_manager/database_manager.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../utils/color_util.dart';
@@ -16,7 +17,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  final AuthRepository _authRepository = AuthRepository(AuthService());
+  final AuthRepository _authRepository =
+      AuthRepository(AuthService(), DatabaseManager());
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
   final TextEditingController _scoreController = TextEditingController();

@@ -13,6 +13,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../data/database_manager/database_manager.dart';
+
 class LoginEmailPage extends StatefulWidget {
   const LoginEmailPage({Key? key}) : super(key: key);
 
@@ -24,7 +26,8 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthRepository _authRepository = AuthRepository(AuthService());
+  final AuthRepository _authRepository =
+      AuthRepository(AuthService(), DatabaseManager());
 
   @override
   Widget build(BuildContext context) {

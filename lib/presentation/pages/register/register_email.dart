@@ -8,6 +8,8 @@ import 'package:firebase_user/utils/widget_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../data/database_manager/database_manager.dart';
+
 class RegisterEmailPage extends StatefulWidget {
   const RegisterEmailPage({Key? key}) : super(key: key);
 
@@ -20,7 +22,8 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthRepository _authRepository = AuthRepository(AuthService());
+  final AuthRepository _authRepository =
+      AuthRepository(AuthService(), DatabaseManager());
 
   @override
   Widget build(BuildContext context) {

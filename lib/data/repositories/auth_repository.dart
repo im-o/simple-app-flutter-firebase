@@ -1,16 +1,20 @@
 import 'dart:developer';
 
+import 'package:firebase_user/data/database_manager/database_manager.dart';
 import 'package:firebase_user/data/services/auth_service.dart';
 
 class AuthRepository {
-  final AuthService authService;
+  final AuthService _authService;
+  final DatabaseManager _databaseManager;
 
-  AuthRepository(this.authService);
+  AuthRepository(this._authService, this._databaseManager);
 
   Future createNewUser(String name, String email, String password) async {
     try {
-      var result = await authService.createNewUser(name, email, password);
+      var result = await _authService.createNewUser(name, email, password);
+      var resultFirestore = await _databaseManager.addUserData(name, "", 0);
       log("Auth Result : " + result.toString());
+      log("Firestore Result : " + resultFirestore.toString());
       return result;
     } catch (e) {
       log("Auth Error : " + e.toString());
@@ -19,7 +23,7 @@ class AuthRepository {
 
   Future loginUser(String email, String password) async {
     try {
-      var result = await authService.loginUser(email, password);
+      var result = await _authService.loginUser(email, password);
       log("Auth Result : " + result.toString());
       return result;
     } catch (e) {
@@ -29,7 +33,7 @@ class AuthRepository {
 
   Future signOut() async {
     try {
-      var result = await authService.signOut();
+      var result = await _authService.signOut();
       log("SignOut Result : " + result.toString());
       return result;
     } catch (e) {
