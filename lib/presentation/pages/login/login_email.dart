@@ -104,23 +104,20 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   }
 
   Widget _textFieldEmail() {
-    return SizedBox(
-      height: 50.0,
-      child: TextFormField(
-        controller: _emailController,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Email cannot be empty";
-          }
-          return null;
-        },
-        style: const TextStyle(fontSize: 14),
-        decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
-          hintText: "Email",
-          prefixIcon: const Icon(
-            Icons.alternate_email,
-            color: ColorUtil.colorTextFilled,
-          ),
+    return TextFormField(
+      controller: _emailController,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Email cannot be empty";
+        }
+        return null;
+      },
+      style: const TextStyle(fontSize: 14),
+      decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
+        hintText: "Email",
+        prefixIcon: const Icon(
+          Icons.alternate_email,
+          color: ColorUtil.colorTextFilled,
         ),
       ),
     );
@@ -129,24 +126,21 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   Widget _textFieldPassword() {
     return Container(
       margin: const EdgeInsets.only(top: 16.0),
-      child: SizedBox(
-        height: 50.0,
-        child: TextFormField(
-          controller: _passwordController,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return "Password cannot be empty";
-            }
-            return null;
-          },
-          style: const TextStyle(fontSize: 14),
-          obscureText: true,
-          decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
-            hintText: "Password",
-            prefixIcon: const Icon(
-              Icons.lock_outline,
-              color: ColorUtil.colorTextFilled,
-            ),
+      child: TextFormField(
+        controller: _passwordController,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return "Password cannot be empty";
+          }
+          return null;
+        },
+        style: const TextStyle(fontSize: 14),
+        obscureText: true,
+        decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
+          hintText: "Password",
+          prefixIcon: const Icon(
+            Icons.lock_outline,
+            color: ColorUtil.colorTextFilled,
           ),
         ),
       ),
