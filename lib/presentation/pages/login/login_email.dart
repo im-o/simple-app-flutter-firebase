@@ -13,6 +13,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../data/database_manager/database_manager.dart';
+
 class LoginEmailPage extends StatefulWidget {
   const LoginEmailPage({Key? key}) : super(key: key);
 
@@ -24,7 +26,8 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthRepository _authRepository = AuthRepository(AuthService());
+  final AuthRepository _authRepository =
+      AuthRepository(AuthService(), DatabaseManager());
 
   @override
   Widget build(BuildContext context) {
@@ -205,11 +208,15 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
     _authRepository
         .loginUser(_emailController.text, _passwordController.text)
         .then((userResult) {
-      User user = userResult;
-      showSnackBar(context, "User email : ${user.email}");
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => const DashboardPage(),
-      ));
+      if (userResult.runtimeType == User) {
+        User user = userResult;
+        showSnackBar(context, "User email : ${user.email}");
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const DashboardPage(),
+        ));
+      } else {
+        showSnackBar(context, "$userResult");
+      }
     });
   }
 }
