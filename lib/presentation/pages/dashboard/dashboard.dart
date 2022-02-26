@@ -89,23 +89,27 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _dashboardBody() {
-    return ListView.builder(
-      itemCount: userList.length,
-      itemBuilder: (context, index) {
-        return Card(
-          child: ListTile(
-            title: Text(userList[index]["name"]),
-            subtitle: Text("Age: ${userList[index]["age"] ?? 0}"),
-            leading: const CircleAvatar(
-              child: Image(
-                image: AssetImage("assets/images/programmer.png"),
+    if (userList.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      return ListView.builder(
+        itemCount: userList.length,
+        itemBuilder: (context, index) {
+          return Card(
+            child: ListTile(
+              title: Text(userList[index]["name"]),
+              subtitle: Text("Age: ${userList[index]["age"] ?? 0}"),
+              leading: const CircleAvatar(
+                child: Image(
+                  image: AssetImage("assets/images/programmer.png"),
+                ),
               ),
+              trailing: Text("Score : ${userList[index]["score"] ?? 0}"),
             ),
-            trailing: Text("Score : ${userList[index]["score"] ?? 0}"),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
   }
 
   void _signOutUser() {
