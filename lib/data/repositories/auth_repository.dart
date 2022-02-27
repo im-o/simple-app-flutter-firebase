@@ -12,12 +12,11 @@ class AuthRepository {
   Future createNewUser(String name, String email, String password) async {
     try {
       var result = await _authService.createNewUser(name, email, password);
-      var resultFirestore = await _databaseManager.addUserData(name, "", 0);
       log("Auth Result : " + result.toString());
-      log("Firestore Result : " + resultFirestore.toString());
       return result;
     } catch (e) {
       log("Auth Error : " + e.toString());
+      return e.toString();
     }
   }
 
@@ -51,6 +50,30 @@ class AuthRepository {
     } catch (e) {
       log(e.toString());
       return null;
+    }
+  }
+
+  Future addUserData(String name) async {
+    try {
+      var result = await _databaseManager.addUserData(name, "", 0);
+      log("User Add AuthRepository: $result");
+      return result;
+    } catch (e) {
+      log("Update Error : " + e.toString());
+      return e.toString();
+    }
+  }
+
+  Future updateUserData(
+      String uid, String name, String gender, int score) async {
+    try {
+      var result =
+          await _databaseManager.updateUserData(uid, name, gender, score);
+      log("User Update AuthRepository: $result");
+      return result;
+    } catch (e) {
+      log("Update Error : " + e.toString());
+      return e.toString();
     }
   }
 }

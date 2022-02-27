@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../data/database_manager/database_manager.dart';
@@ -23,14 +24,21 @@ class _DashboardPageState extends State<DashboardPage> {
   final TextEditingController _genderController = TextEditingController();
   final TextEditingController _scoreController = TextEditingController();
   List userList = [];
+  String userUID = "";
 
   @override
   void initState() {
     super.initState();
+    fetchUserInfo();
     fetchDataUsers();
   }
 
-  void fetchDataUsers() async {
+  fetchUserInfo() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    userUID = auth.currentUser?.uid ?? "";
+  }
+
+  fetchDataUsers() async {
     dynamic result = await _authRepository.getUserList();
     if (result == null) {
       log("Null user data: $result");
@@ -39,6 +47,17 @@ class _DashboardPageState extends State<DashboardPage> {
         userList = result;
       });
     }
+  }
+
+  updateUserData(String uid, String name, String gender, int score) async {
+    await _authRepository
+        .updateUserData(uid, name, gender, score)
+        .then((value) {
+      if (value.runtimeType == String) {
+        showSnackBar(context, value.toString());
+      }
+    });
+    fetchDataUsers();
   }
 
   @override
@@ -50,41 +69,49 @@ class _DashboardPageState extends State<DashboardPage> {
         iconTheme: const IconThemeData(color: ColorUtil.colorPrimary),
         title: const Text("Dashboard", style: TextUtil.textStyle18),
         actions: [
-          ElevatedButton(
-            onPressed: () {
-              openDialogBox();
-            },
-            child: const Icon(
-              Icons.edit,
-              color: ColorUtil.colorPrimary,
-            ),
-            style: ElevatedButton.styleFrom(
-              primary: Colors.transparent,
-              elevation: 0.0,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(0.0)),
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _signOutUser();
-            },
-            child: const Icon(
-              Icons.exit_to_app,
-              color: ColorUtil.colorPrimary,
-            ),
-            style: ElevatedButton.styleFrom(
-              primary: Colors.transparent,
-              elevation: 0.0,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(0.0)),
-              ),
-            ),
-          )
+          _editOption(),
+          _signOutOption(),
         ],
       ),
       body: _dashboardBody(),
+    );
+  }
+
+  Widget _editOption() {
+    return ElevatedButton(
+      onPressed: () {
+        openDialogBox();
+      },
+      child: const Icon(
+        Icons.edit,
+        color: ColorUtil.colorPrimary,
+      ),
+      style: ElevatedButton.styleFrom(
+        primary: Colors.transparent,
+        elevation: 0.0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(0.0)),
+        ),
+      ),
+    );
+  }
+
+  Widget _signOutOption() {
+    return ElevatedButton(
+      onPressed: () {
+        signOutUser();
+      },
+      child: const Icon(
+        Icons.exit_to_app,
+        color: ColorUtil.colorPrimary,
+      ),
+      style: ElevatedButton.styleFrom(
+        primary: Colors.transparent,
+        elevation: 0.0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(0.0)),
+        ),
+      ),
     );
   }
 
@@ -112,7 +139,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  void _signOutUser() {
+  void signOutUser() {
     _authRepository.signOut().then((result) {
       showSnackBar(context, "SignOut User...");
       log("SignOut User : " + result.toString());
@@ -160,6 +187,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               TextButton(
                 onPressed: () {
+                  submitAction(context);
                   Navigator.pop(context);
                 },
                 child: const Text("Submit"),
@@ -167,5 +195,17 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           );
         });
+  }
+
+  submitAction(BuildContext context) {
+    updateUserData(
+      userUID,
+      _nameController.text,
+      _genderController.text,
+      int.parse(_scoreController.text),
+    );
+    _nameController.clear();
+    _genderController.clear();
+    _scoreController.clear();
   }
 }
