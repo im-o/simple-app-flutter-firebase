@@ -64,6 +64,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0.0,
         iconTheme: const IconThemeData(color: ColorUtil.colorPrimary),
@@ -78,39 +79,25 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _editOption() {
-    return ElevatedButton(
+    return IconButton(
       onPressed: () {
         openDialogBox();
       },
-      child: const Icon(
+      icon: const Icon(
         Icons.edit,
         color: ColorUtil.colorPrimary,
-      ),
-      style: ElevatedButton.styleFrom(
-        primary: Colors.transparent,
-        elevation: 0.0,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(0.0)),
-        ),
       ),
     );
   }
 
   Widget _signOutOption() {
-    return ElevatedButton(
+    return IconButton(
       onPressed: () {
         signOutUser();
       },
-      child: const Icon(
+      icon: const Icon(
         Icons.exit_to_app,
         color: ColorUtil.colorPrimary,
-      ),
-      style: ElevatedButton.styleFrom(
-        primary: Colors.transparent,
-        elevation: 0.0,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(0.0)),
-        ),
       ),
     );
   }
@@ -160,7 +147,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   TextField(
                     controller: _nameController,
                     decoration: const InputDecoration(
-                      hintText: "Name",
+                      hintText: "Your Name",
                     ),
                   ),
                   TextField(
