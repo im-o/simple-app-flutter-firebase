@@ -40,4 +40,8 @@ class AuthService {
       return null;
     }
   }
+
+  User? get currentUser {
+    return _auth.currentUser;
+  }
 }
