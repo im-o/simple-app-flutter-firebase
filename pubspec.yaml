@@ -18,6 +18,9 @@ dependencies:
   firebase_auth: ^3.3.6
   cloud_firestore: ^3.1.7
   flutter_svg: ^0.22.0
+  flutter_bloc: ^8.0.1
+  equatable: ^2.0.3
+  bloc_concurrency: ^0.2.0
 
 dev_dependencies:
   flutter_test:

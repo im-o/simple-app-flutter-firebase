@@ -1,9 +1,8 @@
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_user/data/repositories/auth_repository.dart';
-import 'package:firebase_user/data/services/auth_service.dart';
-import 'package:firebase_user/presentation/pages/dashboard/dashboard.dart';
+import 'package:firebase_user/features/auth/presentation/blocs/login_email/login_email_bloc.dart';
+import 'package:firebase_user/features/auth/presentation/forms/submit_status/FormSubmissionStatus.dart';
 import 'package:firebase_user/presentation/pages/register/register_email.dart';
 import 'package:firebase_user/utils/color_util.dart';
 import 'package:firebase_user/utils/text_field_util.dart';
@@ -11,9 +10,10 @@ import 'package:firebase_user/utils/text_util.dart';
 import 'package:firebase_user/utils/widget_util.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../../data/database_manager/database_manager.dart';
+import '../dashboard/dashboard.dart';
 
 class LoginEmailPage extends StatefulWidget {
   const LoginEmailPage({Key? key}) : super(key: key);
@@ -26,8 +26,6 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AuthRepository _authRepository =
-      AuthRepository(AuthService(), DatabaseManager());
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +34,27 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
         backgroundColor: Colors.transparent,
         elevation: 0.0,
       ),
-      body: SingleChildScrollView(
+      body: BlocProvider(
+        create: (_) => LoginEmailBloc(context.read<AuthRepository>()),
+        child: _loginForm(),
+      ),
+    );
+  }
+
+  Widget _loginForm() {
+    return BlocListener<LoginEmailBloc, LoginEmailState>(
+      listener: (context, state) {
+        final submissionStatus = state.submissionStatus;
+        if (submissionStatus is SubmissionFailed) {
+          showSnackBar(context, submissionStatus.exception);
+        }
+        if (submissionStatus is SubmissionSuccess) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const DashboardPage(),
+          ));
+        }
+      },
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 32),
           child: Form(
@@ -104,68 +122,78 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   }
 
   Widget _textFieldEmail() {
-    return TextFormField(
-      controller: _emailController,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return "Email cannot be empty";
-        }
-        return null;
-      },
-      style: const TextStyle(fontSize: 14),
-      decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
-        hintText: "Email",
-        prefixIcon: const Icon(
-          Icons.alternate_email,
-          color: ColorUtil.colorTextFilled,
-        ),
-      ),
-    );
-  }
-
-  Widget _textFieldPassword() {
-    return Container(
-      margin: const EdgeInsets.only(top: 16.0),
-      child: TextFormField(
-        controller: _passwordController,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Password cannot be empty";
-          }
-          return null;
-        },
+    return BlocBuilder<LoginEmailBloc, LoginEmailState>(
+        builder: (context, state) {
+      return TextFormField(
+        controller: _emailController,
+        validator: (value) => state.isValidEmail ? null : 'Is valid email',
+        onChanged: (value) => context
+            .read<LoginEmailBloc>()
+            .add(LoginEmailEmailChanged(email: value)),
         style: const TextStyle(fontSize: 14),
-        obscureText: true,
         decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
-          hintText: "Password",
+          hintText: "Email",
           prefixIcon: const Icon(
-            Icons.lock_outline,
+            Icons.alternate_email,
             color: ColorUtil.colorTextFilled,
           ),
         ),
-      ),
-    );
+      );
+    });
+  }
+
+  Widget _textFieldPassword() {
+    return BlocBuilder<LoginEmailBloc, LoginEmailState>(
+        builder: (context, state) {
+      return Container(
+        margin: const EdgeInsets.only(top: 16.0),
+        child: TextFormField(
+          controller: _passwordController,
+          validator: (value) =>
+              state.isValidPassword ? null : 'Is valid password',
+          onChanged: (value) => context
+              .read<LoginEmailBloc>()
+              .add(LoginEmailPasswordChanged(password: value)),
+          style: const TextStyle(fontSize: 14),
+          obscureText: true,
+          decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
+            hintText: "Password",
+            prefixIcon: const Icon(
+              Icons.lock_outline,
+              color: ColorUtil.colorTextFilled,
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buttonSignIn() {
     return Container(
-      margin: const EdgeInsets.only(top: 64.0),
-      child: ElevatedButton(
-        child: const Text("Login"),
-        style: ElevatedButton.styleFrom(
-          textStyle: TextUtil.textStyle18.copyWith(fontSize: 16),
-          primary: ColorUtil.colorPrimary,
-          fixedSize: Size(MediaQuery.of(context).size.width, 50.0),
-          elevation: 0.0,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8.0)),
-          ),
-        ),
-        onPressed: () => {
-          if (_formKey.currentState!.validate()) _loginUser(),
-        },
-      ),
-    );
+        margin: const EdgeInsets.only(top: 64.0),
+        child: BlocBuilder<LoginEmailBloc, LoginEmailState>(
+            builder: (context, state) {
+          return state.submissionStatus is FormSubmitting
+              ? const CircularProgressIndicator()
+              : ElevatedButton(
+                  child: const Text("Login"),
+                  style: ElevatedButton.styleFrom(
+                    textStyle: TextUtil.textStyle18.copyWith(fontSize: 16),
+                    primary: ColorUtil.colorPrimary,
+                    fixedSize: Size(MediaQuery.of(context).size.width, 50.0),
+                    elevation: 0.0,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                  ),
+                  onPressed: () => {
+                    if (_formKey.currentState!.validate())
+                      context
+                          .read<LoginEmailBloc>()
+                          .add(const LoginEmailSubmitted())
+                  },
+                );
+        }));
   }
 
   Widget _textForgotPassword() {
@@ -195,22 +223,5 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
         ),
       ),
     );
-  }
-
-  void _loginUser() {
-    showSnackBar(context, "Login loading...");
-    _authRepository
-        .loginUser(_emailController.text, _passwordController.text)
-        .then((userResult) {
-      if (userResult.runtimeType == User) {
-        User user = userResult;
-        showSnackBar(context, "User email : ${user.email}");
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const DashboardPage(),
-        ));
-      } else {
-        showSnackBar(context, "$userResult");
-      }
-    });
   }
 }
