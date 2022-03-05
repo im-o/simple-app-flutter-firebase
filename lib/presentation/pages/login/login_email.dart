@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:firebase_user/data/repositories/auth_repository.dart';
 import 'package:firebase_user/features/auth/presentation/blocs/login_email/login_email_bloc.dart';
-import 'package:firebase_user/features/auth/presentation/forms/submit_status/FormSubmissionStatus.dart';
 import 'package:firebase_user/presentation/pages/register/register_email.dart';
 import 'package:firebase_user/utils/color_util.dart';
 import 'package:firebase_user/utils/text_field_util.dart';
@@ -12,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:formz/formz.dart';
 
 import '../dashboard/dashboard.dart';
 
@@ -44,14 +44,14 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   Widget _loginForm() {
     return BlocListener<LoginEmailBloc, LoginEmailState>(
       listener: (context, state) {
-        final submissionStatus = state.submissionStatus;
-        if (submissionStatus is SubmissionFailed) {
-          showSnackBar(context, submissionStatus.exception);
-        }
-        if (submissionStatus is SubmissionSuccess) {
+        final status = state.status;
+        if (status.isSubmissionSuccess) {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => const DashboardPage(),
           ));
+        }
+        if (status.isSubmissionFailure) {
+          showSnackBar(context, state.failure.toString());
         }
       },
       child: SingleChildScrollView(
@@ -126,7 +126,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
         builder: (context, state) {
       return TextFormField(
         controller: _emailController,
-        validator: (value) => state.isValidEmail ? null : 'Is valid email',
+        validator: (value) => state.status.isInvalid ? 'Is valid email' : null,
         onChanged: (value) => context
             .read<LoginEmailBloc>()
             .add(LoginEmailEmailChanged(email: value)),
@@ -150,7 +150,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
         child: TextFormField(
           controller: _passwordController,
           validator: (value) =>
-              state.isValidPassword ? null : 'Is valid password',
+              state.status.isInvalid ? 'Is valid password' : null,
           onChanged: (value) => context
               .read<LoginEmailBloc>()
               .add(LoginEmailPasswordChanged(password: value)),
@@ -170,30 +170,35 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
 
   Widget _buttonSignIn() {
     return Container(
-        margin: const EdgeInsets.only(top: 64.0),
-        child: BlocBuilder<LoginEmailBloc, LoginEmailState>(
-            builder: (context, state) {
-          return state.submissionStatus is FormSubmitting
+      margin: const EdgeInsets.only(top: 64.0),
+      child: BlocBuilder<LoginEmailBloc, LoginEmailState>(
+        builder: (context, state) {
+          return state.status.isSubmissionInProgress
               ? const CircularProgressIndicator()
               : ElevatedButton(
                   child: const Text("Login"),
                   style: ElevatedButton.styleFrom(
                     textStyle: TextUtil.textStyle18.copyWith(fontSize: 16),
-                    primary: ColorUtil.colorPrimary,
+                    primary: state.status.isValidated
+                        ? ColorUtil.colorPrimary
+                        : Theme.of(context).disabledColor,
                     fixedSize: Size(MediaQuery.of(context).size.width, 50.0),
                     elevation: 0.0,
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8.0)),
                     ),
                   ),
-                  onPressed: () => {
-                    if (_formKey.currentState!.validate())
-                      context
-                          .read<LoginEmailBloc>()
-                          .add(const LoginEmailSubmitted())
-                  },
+                  onPressed: state.status.isValidated
+                      ? () => {
+                            context
+                                .read<LoginEmailBloc>()
+                                .add(const LoginEmailSubmitted())
+                          }
+                      : () {},
                 );
-        }));
+        },
+      ),
+    );
   }
 
   Widget _textForgotPassword() {
