@@ -2,31 +2,31 @@ part of 'login_email_bloc.dart';
 
 class LoginEmailState extends Equatable {
   const LoginEmailState({
-    this.email = '',
-    this.password = '',
-    this.submissionStatus = const InitialFormStatus(),
+    this.email = const EmailFormz.pure(),
+    this.password = const PasswordFormz.pure(),
+    this.status = FormzStatus.pure,
+    this.failure,
   });
 
-  final String email;
-
-  bool get isValidEmail => email.length >= 3;
-  final String password;
-
-  bool get isValidPassword => password.length >= 6;
-  final FormSubmissionStatus submissionStatus;
+  final EmailFormz email;
+  final PasswordFormz password;
+  final FormzStatus status;
+  final String? failure;
 
   LoginEmailState copyWith({
-    String? email,
-    String? password,
-    FormSubmissionStatus? submissionStatus,
+    EmailFormz? email,
+    PasswordFormz? password,
+    FormzStatus? status,
+    String? failure,
   }) {
     return LoginEmailState(
       email: email ?? this.email,
       password: password ?? this.password,
-      submissionStatus: submissionStatus ?? this.submissionStatus,
+      status: status ?? this.status,
+      failure: failure ?? this.failure,
     );
   }
 
   @override
-  List<Object> get props => [email, password, submissionStatus];
+  List<Object> get props => [email, password, status];
 }

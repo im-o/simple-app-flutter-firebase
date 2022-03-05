@@ -9,17 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'default_firebase_config.dart';
+import 'features/auth/presentation/blocs/simple_bloc_observer.dart';
 
 Future<void> main() {
-  return BlocOverrides.runZoned(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-      await Firebase.initializeApp(
-        options: DefaultFirebaseConfig.platformOptions,
-      );
-      final authRepository = AuthRepository(AuthService(), DatabaseManager());
-      runApp(App(authRepository: authRepository));
-    },
-    // blocObserver: SimpleBlocObserver(),
-  );
+  return BlocOverrides.runZoned(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseConfig.platformOptions,
+    );
+    final authRepository = AuthRepository(AuthService(), DatabaseManager());
+    runApp(App(authRepository: authRepository));
+  }, blocObserver: SimpleBlocObserver());
 }
