@@ -1,27 +1,27 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_user/data/repositories/auth_repository.dart';
 import 'package:formz/formz.dart';
 
+import '../../../../../data/repositories/auth_repository.dart';
 import '../../formz/formz.dart';
 
-part 'login_email_event.dart';
+part 'register_email_event.dart';
 
-part 'login_email_state.dart';
+part 'register_email_state.dart';
 
-class LoginEmailBloc extends Bloc<LoginEmailEvent, LoginEmailState> {
-  LoginEmailBloc(this.repository) : super(const LoginEmailState()) {
-    on<LoginEmailEmailChanged>(_onEmailChanged);
-    on<LoginEmailPasswordChanged>(_onPasswordChanged);
-    on<LoginEmailSubmitted>(_onSubmitted);
+class RegisterEmailBloc extends Bloc<RegisterEmailEvent, RegisterEmailState> {
+  RegisterEmailBloc(this.repository) : super(const RegisterEmailState()) {
+    on<RegisterEmailEmailChanged>(_onEmailChanged);
+    on<RegisterEmailPasswordChanged>(_onPasswordChanged);
+    on<RegisterEmailSubmitted>(_onSubmitted);
   }
 
   final AuthRepository repository;
 
   void _onEmailChanged(
-    LoginEmailEmailChanged event,
-    Emitter<LoginEmailState> emit,
+    RegisterEmailEmailChanged event,
+    Emitter<RegisterEmailState> emit,
   ) {
     final email = EmailFormz.dirty(event.email);
     emit(state.copyWith(
@@ -31,8 +31,8 @@ class LoginEmailBloc extends Bloc<LoginEmailEvent, LoginEmailState> {
   }
 
   void _onPasswordChanged(
-    LoginEmailPasswordChanged event,
-    Emitter<LoginEmailState> emit,
+    RegisterEmailPasswordChanged event,
+    Emitter<RegisterEmailState> emit,
   ) {
     final password = PasswordFormz.dirty(event.password);
     emit(state.copyWith(
@@ -42,13 +42,14 @@ class LoginEmailBloc extends Bloc<LoginEmailEvent, LoginEmailState> {
   }
 
   void _onSubmitted(
-    LoginEmailSubmitted event,
-    Emitter<LoginEmailState> emit,
+    RegisterEmailSubmitted event,
+    Emitter<RegisterEmailState> emit,
   ) async {
     if (state.status.isValidated) {
       emit(state.copyWith(status: FormzStatus.submissionInProgress));
       try {
-        final result = await repository.loginUser(
+        final result = await repository.createNewUser(
+          state.name,
           state.email.value,
           state.password.value,
         );
