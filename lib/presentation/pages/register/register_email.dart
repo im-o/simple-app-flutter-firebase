@@ -187,7 +187,7 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
               ? () => {
                     context
                         .read<RegisterEmailBloc>()
-                        .add(RegisterEmailSubmitted(_nameController.text))
+                        .add(const RegisterEmailSubmitted())
                   }
               : () {},
         );

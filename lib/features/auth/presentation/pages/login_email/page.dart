@@ -49,6 +49,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
         physics: const BouncingScrollPhysics(),
         children: const [
           HeaderSection(),
+          SizedBox(height: Dimens.dp24),
           FormSection(),
           SizedBox(height: Dimens.dp64),
           BottomSection()

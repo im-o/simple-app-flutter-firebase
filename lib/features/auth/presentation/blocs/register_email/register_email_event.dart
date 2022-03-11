@@ -16,6 +16,15 @@ class RegisterEmailEmailChanged extends RegisterEmailEvent {
   List<Object?> get props => [email];
 }
 
+class RegisterEmailNameChanged extends RegisterEmailEvent {
+  const RegisterEmailNameChanged({required this.name});
+
+  final String name;
+
+  @override
+  List<Object?> get props => [name];
+}
+
 class RegisterEmailPasswordChanged extends RegisterEmailEvent {
   const RegisterEmailPasswordChanged({required this.password});
 
@@ -26,10 +35,8 @@ class RegisterEmailPasswordChanged extends RegisterEmailEvent {
 }
 
 class RegisterEmailSubmitted extends RegisterEmailEvent {
-  const RegisterEmailSubmitted(this.name);
-
-  final String name;
+  const RegisterEmailSubmitted();
 
   @override
-  List<Object?> get props => [name];
+  List<Object?> get props => [];
 }
