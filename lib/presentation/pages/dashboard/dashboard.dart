@@ -26,30 +26,17 @@ class _DashboardPageState extends State<DashboardPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _genderController = TextEditingController();
   final TextEditingController _scoreController = TextEditingController();
-  List userList = [];
   String userUID = "";
 
   @override
   void initState() {
     super.initState();
     fetchUserInfo();
-    fetchDataUsers();
   }
 
   fetchUserInfo() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     userUID = auth.currentUser?.uid ?? "";
-  }
-
-  fetchDataUsers() async {
-    dynamic result = await _authRepository.getUserList();
-    if (result == null) {
-      log("Null user data: $result");
-    } else {
-      setState(() {
-        userList = result;
-      });
-    }
   }
 
   updateUserData(String uid, String name, String gender, int score) async {
@@ -60,13 +47,20 @@ class _DashboardPageState extends State<DashboardPage> {
         showSnackBar(context, value.toString());
       }
     });
-    fetchDataUsers();
   }
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => AuthBloc(repository: _authRepository),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(
+          create: (context) => AuthBloc(repository: _authRepository),
+        ),
+        RepositoryProvider(
+          create: (context) =>
+              UserBloc(repository: _authRepository)..add(UserFetched()),
+        ),
+      ],
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           log("SignOut User : " + state.status.toString());
@@ -126,27 +120,31 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _dashboardBody() {
-    if (userList.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    } else {
-      return ListView.builder(
-        itemCount: userList.length,
-        itemBuilder: (context, index) {
-          return Card(
-            child: ListTile(
-              title: Text(userList[index]["name"]),
-              subtitle: Text("Age: ${userList[index]["age"] ?? 0}"),
-              leading: const CircleAvatar(
-                child: Image(
-                  image: AssetImage("assets/images/programmer.png"),
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, state) {
+        if (state.status == UserStatus.initial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return ListView.builder(
+          itemCount: state.users.length,
+          itemBuilder: (context, index) {
+            var users = state.users;
+            return Card(
+              child: ListTile(
+                title: Text(users[index]["name"]),
+                subtitle: Text("Age: ${users[index]["age"] ?? 0}"),
+                leading: const CircleAvatar(
+                  child: Image(
+                    image: AssetImage("assets/images/programmer.png"),
+                  ),
                 ),
+                trailing: Text("Score : ${users[index]["score"] ?? 0}"),
               ),
-              trailing: Text("Score : ${userList[index]["score"] ?? 0}"),
-            ),
-          );
-        },
-      );
-    }
+            );
+          },
+        );
+      },
+    );
   }
 
   void signOutUser() {
@@ -163,11 +161,6 @@ class _DashboardPageState extends State<DashboardPage> {
         );
       },
     );
-    //     .then((result) {
-    //   showSnackBar(context, "SignOut User...");
-    //   log("SignOut User : " + result.toString());
-    //   Navigator.of(context).pop(true);
-    // });
   }
 
   Future<dynamic> openDialogBox() {
