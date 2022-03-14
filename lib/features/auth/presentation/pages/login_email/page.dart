@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 
 import '../../../../../core/core.dart';
+import '../../../../../data/database_manager/database_manager.dart';
+import '../../../../../data/services/auth_service.dart';
 import '../../../../../presentation/pages/dashboard/dashboard.dart';
 import '../../blocs/blocs.dart';
 import 'sections/sections.dart';
@@ -17,10 +19,13 @@ class LoginEmailPage extends StatefulWidget {
 }
 
 class _LoginEmailPageState extends State<LoginEmailPage> {
+  final AuthRepository _authRepository =
+      AuthRepository(AuthService(), DatabaseManager());
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LoginEmailBloc(context.read<AuthRepository>()),
+      create: (context) => LoginEmailBloc(_authRepository),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,

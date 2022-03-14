@@ -2,10 +2,13 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../data/database_manager/database_manager.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/auth_service.dart';
+import '../../../features/auth/presentation/blocs/blocs.dart';
 import '../../../utils/color_util.dart';
 import '../../../utils/text_util.dart';
 import '../../../utils/widget_util.dart';
@@ -62,19 +65,34 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0.0,
-        iconTheme: const IconThemeData(color: ColorUtil.colorPrimary),
-        title: const Text("Dashboard", style: TextUtil.textStyle18),
-        actions: [
-          _editOption(),
-          _signOutOption(),
-        ],
+    return RepositoryProvider(
+      create: (context) => AuthBloc(repository: _authRepository),
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          log("SignOut User : " + state.status.toString());
+          if (state.status == AuthenticationStatus.unAuthenticated) {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              SystemNavigator.pop();
+            }
+          }
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.transparent,
+              elevation: 0.0,
+              iconTheme: const IconThemeData(color: ColorUtil.colorPrimary),
+              title: const Text("Dashboard", style: TextUtil.textStyle18),
+              actions: [
+                _editOption(),
+                _signOutOption(),
+              ],
+            ),
+            body: _dashboardBody(),
+          );
+        },
       ),
-      body: _dashboardBody(),
     );
   }
 
@@ -91,14 +109,19 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _signOutOption() {
-    return IconButton(
-      onPressed: () {
-        signOutUser();
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        log("SignOut User : " + state.status.toString());
+        return IconButton(
+          onPressed: () {
+            BlocProvider.of<AuthBloc>(context).add(AuthLogoutRequested());
+          },
+          icon: const Icon(
+            Icons.exit_to_app,
+            color: ColorUtil.colorPrimary,
+          ),
+        );
       },
-      icon: const Icon(
-        Icons.exit_to_app,
-        color: ColorUtil.colorPrimary,
-      ),
     );
   }
 
@@ -127,11 +150,24 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void signOutUser() {
-    _authRepository.signOut().then((result) {
-      showSnackBar(context, "SignOut User...");
-      log("SignOut User : " + result.toString());
-      Navigator.of(context).pop(true);
-    });
+    BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        context.read<AuthBloc>().add(AuthLogoutRequested());
+        return BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            log("SignOut User : " + state.status.toString());
+            if (state.status is AuthState) {
+              log("SignOut User : " + state.status.toString());
+            }
+          },
+        );
+      },
+    );
+    //     .then((result) {
+    //   showSnackBar(context, "SignOut User...");
+    //   log("SignOut User : " + result.toString());
+    //   Navigator.of(context).pop(true);
+    // });
   }
 
   Future<dynamic> openDialogBox() {
