@@ -6,7 +6,6 @@ import 'package:equatable/equatable.dart';
 import '../../../../../data/repositories/auth_repository.dart';
 
 part 'user_event.dart';
-
 part 'user_state.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
@@ -35,5 +34,25 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
-  FutureOr<void> _onUserUpdated(UserUpdated event, Emitter<UserState> emit) {}
+  FutureOr<void> _onUserUpdated(
+      UserUpdated event, Emitter<UserState> emit) async {
+    try {
+      await repository
+          .updateUserData(
+        event.uid,
+        event.name,
+        event.gender,
+        event.score,
+      )
+          .then((value) {
+        if (value.runtimeType == String) {
+          emit(state.copyWith(status: UserStatus.failure));
+        } else {
+          emit(state.copyWith(status: UserStatus.success));
+        }
+      });
+    } catch (e) {
+      return emit(state.copyWith(status: UserStatus.failure));
+    }
+  }
 }
