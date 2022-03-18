@@ -1,35 +1,37 @@
-import 'package:firebase_user/data/repositories/auth_repository.dart';
-import 'package:firebase_user/utils/widget_util.dart';
+import 'package:firebase_user/features/auth/presentation/blocs/blocs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 
 import '../../../../../core/core.dart';
 import '../../../../../data/database_manager/database_manager.dart';
+import '../../../../../data/repositories/auth_repository.dart';
 import '../../../../../data/services/auth_service.dart';
 import '../../../../../presentation/pages/dashboard/dashboard.dart';
-import '../../blocs/blocs.dart';
+import '../../../../../utils/utils.dart';
 import 'sections/sections.dart';
 
-class LoginEmailPage extends StatefulWidget {
-  const LoginEmailPage({Key? key}) : super(key: key);
+class RegisterEmailPage extends StatefulWidget {
+  const RegisterEmailPage({Key? key}) : super(key: key);
 
   @override
-  _LoginEmailPageState createState() => _LoginEmailPageState();
+  _RegisterEmailPageState createState() => _RegisterEmailPageState();
 }
 
-class _LoginEmailPageState extends State<LoginEmailPage> {
+class _RegisterEmailPageState extends State<RegisterEmailPage> {
   final AuthRepository _authRepository =
       AuthRepository(AuthService(), DatabaseManager());
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LoginEmailBloc(_authRepository),
+      create: (context) => RegisterEmailBloc(_authRepository),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0.0,
+          iconTheme: const IconThemeData(color: ColorUtil.colorPrimary),
+          title: const Text("Register", style: TextUtil.textStyle18),
         ),
         body: _buildBody(),
       ),
@@ -37,7 +39,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   }
 
   Widget _buildBody() {
-    return BlocListener<LoginEmailBloc, LoginEmailState>(
+    return BlocListener<RegisterEmailBloc, RegisterEmailState>(
       listener: (context, state) {
         final status = state.status;
         if (status.isSubmissionSuccess) {

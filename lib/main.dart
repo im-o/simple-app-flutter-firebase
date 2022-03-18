@@ -8,8 +8,8 @@ import 'package:firebase_user/data/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/utils/simple_bloc_observer.dart';
 import 'default_firebase_config.dart';
-import 'features/auth/presentation/blocs/simple_bloc_observer.dart';
 
 Future<void> main() {
   return BlocOverrides.runZoned(() async {

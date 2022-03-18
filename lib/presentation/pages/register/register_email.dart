@@ -1,14 +1,20 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:developer';
+
 import 'package:firebase_user/data/repositories/auth_repository.dart';
 import 'package:firebase_user/data/services/auth_service.dart';
+import 'package:firebase_user/features/auth/presentation/blocs/blocs.dart';
 import 'package:firebase_user/utils/color_util.dart';
 import 'package:firebase_user/utils/text_field_util.dart';
 import 'package:firebase_user/utils/text_util.dart';
 import 'package:firebase_user/utils/widget_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:formz/formz.dart';
 
+import '../../../core/core.dart';
 import '../../../data/database_manager/database_manager.dart';
+import '../dashboard/dashboard.dart';
 
 class RegisterEmailPage extends StatefulWidget {
   const RegisterEmailPage({Key? key}) : super(key: key);
@@ -34,7 +40,27 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
         iconTheme: const IconThemeData(color: ColorUtil.colorPrimary),
         title: const Text("Register", style: TextUtil.textStyle18),
       ),
-      body: SingleChildScrollView(
+      body: RepositoryProvider(
+        create: (_) => RegisterEmailBloc(_authRepository),
+        child: _registerForm(),
+      ),
+    );
+  }
+
+  Widget _registerForm() {
+    return BlocListener<RegisterEmailBloc, RegisterEmailState>(
+      listener: (context, state) {
+        final status = state.status;
+        if (status.isSubmissionSuccess) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const DashboardPage(),
+          ));
+        }
+        if (status.isSubmissionFailure) {
+          showSnackBar(context, state.failure.toString());
+        }
+      },
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 32),
           child: Form(
@@ -44,8 +70,11 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
                 _imageLoginHeader(),
                 _textTitle(),
                 _textFieldName(),
+                const SizedBox(height: Dimens.dp16),
                 _textFieldEmail(),
+                const SizedBox(height: Dimens.dp16),
                 _textFieldPassword(),
+                const SizedBox(height: Dimens.dp64),
                 _buttonSignIn(),
               ],
             ),
@@ -91,93 +120,78 @@ class _RegisterEmailPageState extends State<RegisterEmailPage> {
   }
 
   Widget _textFieldEmail() {
-    return Container(
-      margin: const EdgeInsets.only(top: 16.0),
-      child: TextFormField(
-        controller: _emailController,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Email cannot be empty";
-          }
-          return null;
-        },
-        style: const TextStyle(fontSize: 14),
-        decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
-          hintText: "Email",
-          prefixIcon: const Icon(
-            Icons.alternate_email,
-            color: ColorUtil.colorTextFilled,
+    return BlocBuilder<RegisterEmailBloc, RegisterEmailState>(
+      builder: (context, state) {
+        log('RegisterEmailState XXX : ${state.status.isInvalid}');
+        return TextFormField(
+          controller: _emailController,
+          validator: (value) =>
+              state.status.isInvalid ? 'Is invalid email' : null,
+          onChanged: (value) => context
+              .read<RegisterEmailBloc>()
+              .add(RegisterEmailEmailChanged(email: value)),
+          style: const TextStyle(fontSize: 14),
+          decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
+            hintText: "Email",
+            prefixIcon: const Icon(
+              Icons.alternate_email,
+              color: ColorUtil.colorTextFilled,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _textFieldPassword() {
-    return Container(
-      margin: const EdgeInsets.only(top: 16.0),
-      child: TextFormField(
-        controller: _passwordController,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "Password cannot be empty";
-          }
-          return null;
-        },
-        style: const TextStyle(fontSize: 14),
-        obscureText: true,
-        decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
-          hintText: "Password",
-          prefixIcon: const Icon(
-            Icons.lock_outline,
-            color: ColorUtil.colorTextFilled,
+    return BlocBuilder<RegisterEmailBloc, RegisterEmailState>(
+      builder: (context, state) {
+        return TextFormField(
+          controller: _passwordController,
+          validator: (value) =>
+              state.status.isInvalid ? 'Is invalid password' : null,
+          onChanged: (value) => context
+              .read<RegisterEmailBloc>()
+              .add(RegisterEmailPasswordChanged(password: value)),
+          style: const TextStyle(fontSize: 14),
+          obscureText: true,
+          decoration: TextFieldUtil.inputDecorationFormLogin.copyWith(
+            hintText: "Password",
+            prefixIcon: const Icon(
+              Icons.lock_outline,
+              color: ColorUtil.colorTextFilled,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buttonSignIn() {
-    return Container(
-      margin: const EdgeInsets.only(top: 64.0),
-      child: ElevatedButton(
-        child: const Text("Register"),
-        style: ElevatedButton.styleFrom(
-          textStyle: TextUtil.textStyle18.copyWith(fontSize: 16),
-          primary: ColorUtil.colorPrimary,
-          fixedSize: Size(MediaQuery.of(context).size.width, 50.0),
-          elevation: 0.0,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+    return BlocBuilder<RegisterEmailBloc, RegisterEmailState>(
+      builder: (context, state) {
+        return ElevatedButton(
+          child: const Text("Register"),
+          style: ElevatedButton.styleFrom(
+            textStyle: TextUtil.textStyle18.copyWith(fontSize: 16),
+            primary: state.status.isValidated
+                ? ColorUtil.colorPrimary
+                : Theme.of(context).disabledColor,
+            fixedSize: Size(MediaQuery.of(context).size.width, 50.0),
+            elevation: 0.0,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
           ),
-        ),
-        onPressed: () => {
-          if (_formKey.currentState!.validate()) createNewUser(),
-        },
-      ),
+          onPressed: state.status.isValidated
+              ? () => {
+                    context
+                        .read<RegisterEmailBloc>()
+                        .add(const RegisterEmailSubmitted())
+                  }
+              : () {},
+        );
+      },
     );
-  }
-
-  void createNewUser() {
-    showSnackBar(context, "Register Loading...");
-    _authRepository
-        .createNewUser(
-      _nameController.text,
-      _emailController.text,
-      _passwordController.text,
-    )
-        .then((result) {
-      if (result.runtimeType == User) {
-        User user = result;
-        _authRepository.addUserData(_nameController.text);
-        showSnackBar(context, "Register email : ${user.email}");
-        _nameController.clear();
-        _emailController.clear();
-        _passwordController.clear();
-        Navigator.pop(context);
-      } else {
-        showSnackBar(context, result.toString());
-      }
-    });
   }
 }
