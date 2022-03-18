@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_user/features/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,8 +10,6 @@ import '../../../data/database_manager/database_manager.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../features/auth/presentation/blocs/blocs.dart';
-import '../../../utils/color_util.dart';
-import '../../../utils/text_util.dart';
 import '../../../utils/utils.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -73,7 +72,8 @@ class _DashboardPageState extends State<DashboardPage> {
             create: (context) => AuthBloc(repository: _authRepository),
           ),
           BlocProvider(
-            create: (context) => UserBloc(repository: _authRepository),
+            create: (context) =>
+                UserBloc(repository: _authRepository)..add(UserFetched()),
           ),
         ],
         child: MultiBlocListener(
@@ -115,66 +115,58 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, state) {
         return IconButton(
           onPressed: () {
-            showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text("Edit user details"),
-                    content: SizedBox(
-                      height: 150.0,
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(
-                              hintText: "Your Name",
-                            ),
-                          ),
-                          TextField(
-                            controller: _genderController,
-                            decoration: const InputDecoration(
-                              hintText: "Gender",
-                            ),
-                          ),
-                          TextField(
-                            controller: _scoreController,
-                            decoration: const InputDecoration(
-                              hintText: "Score",
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text("Cancel"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          BlocProvider.of<UserBloc>(context).add(UserUpdated(
-                            uid: userUID,
-                            name: _nameController.text,
-                            gender: _genderController.text,
-                            score: int.parse(_scoreController.text),
-                          ));
-                          // context.read<UserBloc>().add(UserUpdated(
-                          //       uid: userUID,
-                          //       name: _nameController.text,
-                          //       gender: _genderController.text,
-                          //       score: int.parse(_scoreController.text),
-                          //     ));
-                          Navigator.pop(context);
-                        },
-                        child: const Text("Submit"),
-                      )
-                      //   },
-                      // ),
-                    ],
-                  );
-                });
+            // Navigator.of(context).push(MaterialPageRoute(
+            //   builder: (context) => const UpdateUserPage(),
+            // ));
+            // showDialog(
+            //     context: context,
+            //     builder: (context) {
+            //       return AlertDialog(
+            //         title: const Text("Edit user details"),
+            //         content: SizedBox(
+            //           height: 150.0,
+            //           child: Column(
+            //             children: [
+            //               TextField(
+            //                 controller: _nameController,
+            //                 decoration: const InputDecoration(
+            //                   hintText: "Your Name",
+            //                 ),
+            //               ),
+            //               TextField(
+            //                 controller: _genderController,
+            //                 decoration: const InputDecoration(
+            //                   hintText: "Gender",
+            //                 ),
+            //               ),
+            //               TextField(
+            //                 controller: _scoreController,
+            //                 decoration: const InputDecoration(
+            //                   hintText: "Score",
+            //                 ),
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //         actions: [
+            //           TextButton(
+            //             onPressed: () {
+            //               Navigator.pop(context);
+            //             },
+            //             child: const Text("Cancel"),
+            //           ),
+            //           TextButton(
+            //             onPressed: () {
+            //               submitAction(context);
+            //               Navigator.pop(context);
+            //             },
+            //             child: const Text("Submit"),
+            //           )
+            //           //   },
+            //           // ),
+            //         ],
+            //       );
+            //     });
           },
           icon: const Icon(
             Icons.edit,
@@ -215,13 +207,20 @@ class _DashboardPageState extends State<DashboardPage> {
             return Card(
               child: ListTile(
                 title: Text(users[index]["name"]),
-                subtitle: Text("Age: ${users[index]["age"] ?? 0}"),
+                subtitle: Text("Gender: ${users[index]["gender"]}"),
                 leading: const CircleAvatar(
                   child: Image(
                     image: AssetImage("assets/images/programmer.png"),
                   ),
                 ),
                 trailing: Text("Score : ${users[index]["score"] ?? 0}"),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => UpdateUserPage(
+                      user: users[index],
+                    ),
+                  ));
+                },
               ),
             );
           },

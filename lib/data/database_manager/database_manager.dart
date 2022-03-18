@@ -8,7 +8,8 @@ class DatabaseManager {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   Future<dynamic> addUserData(String name, String gender, int score) async {
-    String uid = auth.currentUser?.uid ?? "";
+    String? uid = auth.currentUser?.uid;
+    log("UID UID : " + uid.toString());
     try {
       var query = userQuery.doc(uid).set({
         'uid': uid,
@@ -27,6 +28,7 @@ class DatabaseManager {
       String uid, String name, String gender, int score) async {
     try {
       return userQuery.doc(uid).set({
+        'uid': uid,
         'name': name,
         'gender': gender,
         'score': score,

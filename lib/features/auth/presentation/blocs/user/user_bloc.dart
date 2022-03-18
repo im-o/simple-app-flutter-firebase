@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -37,6 +38,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   FutureOr<void> _onUserUpdated(
       UserUpdated event, Emitter<UserState> emit) async {
     try {
+      emit(state.copyWith(status: UserStatus.loading));
+      log('This User : ${event.uid} | ${event.name} | ${event.gender} | ${event.score}');
       await repository
           .updateUserData(
         event.uid,
@@ -48,7 +51,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         if (value.runtimeType == String) {
           emit(state.copyWith(status: UserStatus.failure));
         } else {
-          emit(state.copyWith(status: UserStatus.success));
+          emit(state.copyWith(status: UserStatus.updated));
         }
       });
     } catch (e) {
