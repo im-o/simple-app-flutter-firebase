@@ -18,6 +18,9 @@ abstract class TextFieldUtil {
     enabledBorder: OutlineInputBorder(
       borderSide: BorderSide(color: Colors.transparent),
     ),
+    errorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red),
+    ),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
     ),
