@@ -16,7 +16,7 @@ class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
 
   @override
-  _DashboardPageState createState() => _DashboardPageState();
+  State<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends State<DashboardPage> {
@@ -33,12 +33,12 @@ class _DashboardPageState extends State<DashboardPage> {
     fetchUserInfo();
   }
 
-  fetchUserInfo() async {
+  void fetchUserInfo() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     userUID = auth.currentUser?.uid ?? "";
   }
 
-  updateUserData(String uid, String name, String gender, int score) async {
+  void updateUserData(String uid, String name, String gender, int score) async {
     await _authRepository
         .updateUserData(uid, name, gender, score)
         .then((value) {
@@ -46,22 +46,6 @@ class _DashboardPageState extends State<DashboardPage> {
         showSnackBar(context, value.toString());
       }
     });
-    // context.read<UserBloc>().add(UserUpdated(
-    //       uid: uid,
-    //       name: name,
-    //       gender: gender,
-    //       score: score,
-    //     ));
-    // // BlocBuilder<UserBloc, UserState>(
-    // //   builder: (context, state) {
-    // // aBlocProvider.of<UserBloc>(context)
-    // //     .add(UserUpdated(uid: uid, name: name, gender: gender, score: score));
-    // //     return Container();
-    // //   },
-    // // );
-    // // BlocProvider(
-    // //   create: (context) => UserBloc(repository: _authRepository)..add(),
-    // // );
   }
 
   @override
@@ -115,61 +99,12 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, state) {
         return IconButton(
           onPressed: () {
-            // Navigator.of(context).push(MaterialPageRoute(
-            //   builder: (context) => const UpdateUserPage(),
-            // ));
-            // showDialog(
-            //     context: context,
-            //     builder: (context) {
-            //       return AlertDialog(
-            //         title: const Text("Edit user details"),
-            //         content: SizedBox(
-            //           height: 150.0,
-            //           child: Column(
-            //             children: [
-            //               TextField(
-            //                 controller: _nameController,
-            //                 decoration: const InputDecoration(
-            //                   hintText: "Your Name",
-            //                 ),
-            //               ),
-            //               TextField(
-            //                 controller: _genderController,
-            //                 decoration: const InputDecoration(
-            //                   hintText: "Gender",
-            //                 ),
-            //               ),
-            //               TextField(
-            //                 controller: _scoreController,
-            //                 decoration: const InputDecoration(
-            //                   hintText: "Score",
-            //                 ),
-            //               ),
-            //             ],
-            //           ),
-            //         ),
-            //         actions: [
-            //           TextButton(
-            //             onPressed: () {
-            //               Navigator.pop(context);
-            //             },
-            //             child: const Text("Cancel"),
-            //           ),
-            //           TextButton(
-            //             onPressed: () {
-            //               submitAction(context);
-            //               Navigator.pop(context);
-            //             },
-            //             child: const Text("Submit"),
-            //           )
-            //           //   },
-            //           // ),
-            //         ],
-            //       );
-            //     });
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const UpdateUserPage(user: []),
+            ));
           },
           icon: const Icon(
-            Icons.edit,
+            Icons.add,
             color: ColorUtil.colorPrimary,
           ),
         );
@@ -180,7 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _signOutOption() {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        log("SignOut User : " + state.status.toString());
+        log("SignOut User : ${state.status}");
         return IconButton(
           onPressed: () {
             context.read<AuthBloc>().add(AuthLogoutRequested());
@@ -229,7 +164,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  submitAction(BuildContext context) {
+  void submitAction(BuildContext context) {
     updateUserData(
       userUID,
       _nameController.text,

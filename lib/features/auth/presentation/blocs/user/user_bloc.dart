@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../../data/repositories/auth_repository.dart';
 
@@ -36,13 +36,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   FutureOr<void> _onUserUpdated(
-      UserUpdated event, Emitter<UserState> emit) async {
+    UserUpdated event,
+    Emitter<UserState> emit,
+  ) async {
     try {
       emit(state.copyWith(status: UserStatus.loading));
-      log('This User : ${event.uid} | ${event.name} | ${event.gender} | ${event.score}');
+      var uuid = const Uuid();
       await repository
           .updateUserData(
-        event.uid,
+        event.uid ?? uuid.v1(),
         event.name,
         event.gender,
         event.score,

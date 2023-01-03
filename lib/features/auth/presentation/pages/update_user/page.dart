@@ -11,12 +11,12 @@ import '../../../../../utils/utils.dart';
 import 'sections/sections.dart';
 
 class UpdateUserPage extends StatefulWidget {
-  const UpdateUserPage({Key? key, required this.user}) : super(key: key);
+  const UpdateUserPage({Key? key, this.user}) : super(key: key);
 
   final dynamic user;
 
   @override
-  _UpdateUserPageState createState() => _UpdateUserPageState();
+  State<UpdateUserPage> createState() => _UpdateUserPageState();
 }
 
 class _UpdateUserPageState extends State<UpdateUserPage> {
@@ -32,7 +32,10 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
           backgroundColor: Colors.transparent,
           elevation: 0.0,
           iconTheme: const IconThemeData(color: ColorUtil.colorPrimary),
-          title: const Text("Update User", style: TextUtil.textStyle18),
+          title: Text(
+            _userIsNotEmpty() ? "Update User" : "Add User",
+            style: TextUtil.textStyle18,
+          ),
         ),
         body: _buildBody(),
       ),
@@ -58,9 +61,13 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
         children: [
           const HeaderSection(),
           const SizedBox(height: Dimens.dp24),
-          FormSection(user: widget.user)
+          FormSection(user: widget.user ?? [])
         ],
       ),
     );
+  }
+
+  bool _userIsNotEmpty() {
+    return (widget.user.isNotEmpty);
   }
 }

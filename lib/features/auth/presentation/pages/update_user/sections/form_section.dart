@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:firebase_user/presentation/pages/dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +7,7 @@ import '../../../../../../utils/utils.dart';
 import '../../../blocs/blocs.dart';
 
 class FormSection extends StatefulWidget {
-  const FormSection({Key? key, required this.user}) : super(key: key);
+  const FormSection({Key? key, this.user}) : super(key: key);
 
   final dynamic user;
 
@@ -24,15 +22,16 @@ class _FormSectionState extends State<FormSection> {
 
   @override
   Widget build(BuildContext context) {
-    _nameController.text = widget.user['name'];
-    _genderController.text = widget.user['gender'];
-    _scoreController.text = widget.user['score'].toString();
+    _nameController.text = _userIsNotEmpty() ? widget.user['name'] : "";
+    _genderController.text = _userIsNotEmpty() ? widget.user['gender'] : "";
+    _scoreController.text =
+        _userIsNotEmpty() ? widget.user['score'].toString() : "";
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {
-        log("Test : ${state.status}");
         if (state.status == UserStatus.updated) {
-          Route route =
-              MaterialPageRoute(builder: (context) => const DashboardPage());
+          Route route = MaterialPageRoute(
+            builder: (context) => const DashboardPage(),
+          );
           Navigator.pushReplacement(context, route);
         }
       },
@@ -74,39 +73,35 @@ class _FormSectionState extends State<FormSection> {
             return state.status == UserStatus.loading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-                    child: const Text("Update User"),
                     style: ElevatedButton.styleFrom(
                       textStyle: TextUtil.textStyle18.copyWith(fontSize: 16),
-                      primary: ColorUtil.colorPrimary,
+                      backgroundColor: ColorUtil.colorPrimary,
                       fixedSize: Size(MediaQuery.of(context).size.width, 50.0),
                       elevation: 0.0,
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8.0)),
                       ),
                     ),
-                    onPressed: () =>
-                        // userUID.isNotEmpty &&
-                        //         _nameController.text.isNotEmpty &&
-                        //         _genderController.text.isNotEmpty &&
-                        //         _scoreController.text.isNotEmpty
-                        //     ? () =>
-                        {
-                          log('Load'),
+                    onPressed: () => {
                           context.read<UserBloc>().add(UserUpdated(
-                                uid: widget.user['uid'],
+                                uid: _userIsNotEmpty()
+                                    ? widget.user['uid']
+                                    : null,
                                 name: _nameController.text,
                                 gender: _genderController.text,
                                 score: int.parse(_scoreController.text),
                               ))
-                        }
-                    // : () => {
-                    //       log('Some form is empty'),
-                    //       showSnackBar(context, 'Some form is empty')
-                    //     },
-                    );
+                        },
+                    child: Text(
+                      _userIsNotEmpty() ? "Update User" : "Add User",
+                    ));
           },
         ),
       ],
     );
+  }
+
+  bool _userIsNotEmpty() {
+    return widget.user.isNotEmpty;
   }
 }

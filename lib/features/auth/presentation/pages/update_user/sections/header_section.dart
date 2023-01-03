@@ -13,7 +13,7 @@ class HeaderSection extends StatelessWidget {
       children: [
         SvgPicture.asset(MainAssets.loginHeaderSvg),
         const SizedBox(height: Dimens.dp24),
-        const TitleText('Hey,\nThis Update User Page,'),
+        const TitleText('Hey,\nThis is Form User Page,'),
       ],
     );
   }
